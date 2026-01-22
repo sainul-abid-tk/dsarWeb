@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-  ],
+, "delete-admin.js", "prisma/seed.mjs"  ],
   "exclude": ["node_modules"]
 }

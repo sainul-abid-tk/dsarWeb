@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  role      String   @default("owner") // admin | owner
+  company   Company?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+}
+
+model Company {
+  id                      String         @id @default(cuid())
+  ownerId                 String         @unique
+  owner                   User           @relation(fields: [ownerId], references: [id])
+  name                    String
+  logo                    String?
+  address                 String?
+  email                   String?
+  phone                   String?
+  employeesCount          Int?
+  field                   String?
+  representation          String         @default("EU") // EU | UK | EU_UK
+  status                  String         @default("pending") // pending | approved | rejected
+  slug                    String?        @unique
+  stripeCustomerId        String?        @unique
+  stripeSubscriptionId    String?
+  subscriptionStatus      String         @default("inactive") // inactive | trialing | active | canceled | past_due
+  subscriptionEndDate     DateTime?
+  dsarRequests            DsarRequest[]
+  createdAt               DateTime       @default(now())
+  updatedAt               DateTime       @updatedAt
+
+  @@index([status])
+  @@index([ownerId])
+}
+
+model DsarRequest {
+  id              String   @id @default(cuid())
+  companyId       String
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  requesterName   String
+  requesterEmail  String
+  requesterPhone  String
+  requestText     String
+  documentUrls    String?
+  status          String   @default("open") // open | in_progress | in_review | closed
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model StripeEvent {
+  id            String   @id @default(cuid())
+  type          String
+  stripeId      String   @unique
+  data          String
+  processed     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+}
